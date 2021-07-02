@@ -1,0 +1,17 @@
+plugins {
+	id 'java-library'
+	id 'idea'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation "org.apache.tika:tika-parsers:${tikaVersion}"
+	implementation "org.apache.lucene:lucene-core:${luceneVersion}"
+	implementation "org.apache.lucene:lucene-analyzers-common:${luceneVersion}"
+	implementation "commons-cli:commons-cli:${commonsCliVersion}"
+	implementation "org.apache.logging.log4j:log4j-slf4j-impl:${log4jSlf4jVersion}"
+	implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+}
