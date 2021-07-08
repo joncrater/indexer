@@ -16,6 +16,7 @@ public class Crawler {
 
     private Crawler(Set<File> directories, WorkManager workManager, CrawlFilter filter, boolean recurse) {
         this.directories = Preconditions.checkNotNull(directories, "Directories is null.");
+        Preconditions.checkState(!this.directories.isEmpty(), "No crawl directories provided.");
         for (File dir : this.directories) {
             Preconditions.checkState(dir.isDirectory(),
                     "Provided directory does not exist or is not a directories: " + dir.getAbsolutePath());
@@ -30,17 +31,19 @@ public class Crawler {
      */
     public void crawl() {
         this.directories.forEach(dir -> {
-            logger.info("Starting crawl of {}", dir.getAbsolutePath());
+            logger.trace("Starting crawl of {}", dir.getAbsolutePath());
             File[] candidates = dir.listFiles(f -> filter.allows(f));
             crawlInternal(candidates);
-            logger.info("Completed crawl of {}", dir.getAbsolutePath());
+            logger.trace("Completed crawl of {}", dir.getAbsolutePath());
         });
     }
 
     private void crawlInternal(File[] candidates) {
         for (File candidate : candidates) {
             if (candidate.isDirectory() && recurse) {
+                logger.trace("Starting crawl of {}", candidate.getAbsolutePath());
                 crawlInternal(candidate.listFiles(f -> filter.allows(f)));
+                logger.trace("Completed crawl of {}", candidate.getAbsolutePath());
             } else if (filter.allows(candidate)) {
                 workManager.queueWork(candidate);
             }

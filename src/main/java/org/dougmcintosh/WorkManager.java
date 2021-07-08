@@ -14,12 +14,9 @@ import java.util.concurrent.TimeUnit;
 public class WorkManager implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(WorkManager.class);
     private ExecutorService threadPool;
-    private int workers;
 
     public WorkManager(int workers) {
         Preconditions.checkState(workers >= 1, "Workers must be >= 1.");
-
-        this.workers = workers;
         this.threadPool = Executors.newFixedThreadPool(workers, new ThreadFactory() {
             private int workerIdx;
 
@@ -48,6 +45,8 @@ public class WorkManager implements Closeable {
                 logger.error("Thread pool interrupted while awaiting worker completion.", e);
                 throw new IndexingException(e);
             }
+
+            logger.info("Thread pool shutdown complete.");
         }
     }
 }

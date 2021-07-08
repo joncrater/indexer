@@ -1,0 +1,36 @@
+Configuration:
+  status: warn
+  name: indexer
+  properties:
+    property:
+      name: filename
+      value: var/log/indexer.log
+  thresholdFilter:
+    level: trace
+  appenders:
+    Console:
+      name: STDOUT
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "%d %p %C{1.} [%t] %m%n"
+    File:
+      name: File
+      fileName: ${filename}
+      PatternLayout:
+        Pattern: "%d %p %C{1.} [%t] %m%n"
+      Filters:
+        ThresholdFilter:
+          level: debug
+
+  Loggers:
+    logger:
+      - name: org.dougmcintosh
+        level: debug
+        additivity: false
+        AppenderRef:
+          - ref: STDOUT
+          #- ref: File
+    Root:
+      level: error
+      AppenderRef:
+        ref: STDOUT
