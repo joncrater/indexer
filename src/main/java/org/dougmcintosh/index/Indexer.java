@@ -11,9 +11,8 @@ import java.util.regex.Pattern;
 
 public class Indexer {
     private static final Logger logger = LoggerFactory.getLogger(Indexer.class);
-    private static final Pattern FILE_PATTERN = Pattern.compile(".+\\.pdf$");
+    private static final Pattern FILE_PATTERN = Pattern.compile("(?i).+\\.pdf$");
     private IndexerArgs args;
-    private WorkManager workManager;
 
     private Indexer(IndexerArgs args) {
         this.args = Preconditions.checkNotNull(args);
@@ -27,10 +26,11 @@ public class Indexer {
         try (final WorkManager workMgr = new WorkManager(args.getWorkers())) {
             final Crawler crawler = Crawler.builder()
                     .directories(args.getInputdirs())
-                    .filter(file -> FILE_PATTERN.matcher(file.getName()).matches())
-                    .workManager(workManager)
+                    .filter(file -> file.isDirectory() || file.isFile() && FILE_PATTERN.matcher(file.getName()).matches())
+                    .workManager(workMgr)
                     .recurse(args.isRecurse())
                     .build();
+            crawler.crawl();
         }
     }
 }

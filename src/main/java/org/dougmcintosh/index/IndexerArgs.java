@@ -31,21 +31,23 @@ public class IndexerArgs {
         initOutputDir(outputdirPath);
         initStopWordsFile(stopwordsPath);
         Preconditions.checkState(workers >= 1, "Workers must be >= 1.");
+        this.recurse = recurse;
         this.workers = workers;
     }
 
     private void initInputDirs(Set<String> inputDirPaths) {
-        Set<File> inputdirs = inputDirPaths.stream().map(
+        this.inputdirs = inputDirPaths.stream().map(
                 s -> new File(s)).collect(Collectors.toCollection(LinkedHashSet::new));
 
-        inputdirs.stream().forEach(d ->
+        this.inputdirs.stream().forEach(d ->
             Preconditions.checkState(d.isDirectory(),
                     "Input directory does not exist or isn't a directory: " + d.getAbsolutePath()));
     }
 
     private void initOutputDir(String outputdirPath) {
         this.outputdir = new File(outputdirPath);
-        Preconditions.checkState(outputdir.isDirectory(), "Output directory does not exist or isn't a directory.");
+        Preconditions.checkState(outputdir.isDirectory(),
+                "Output directory does not exist or isn't a directory: " + outputdir.getAbsolutePath());
     }
 
     private void initStopWordsFile(Optional<String> stopwordsPath) {
@@ -108,12 +110,7 @@ public class IndexerArgs {
             return this;
         }
 
-        public Builder workers(Integer workers) {
-            this.workers = workers;
-            return this;
-        }
-
-        public Builder recurse(int workers) {
+        public Builder workers(int workers) {
             this.workers = workers;
             return this;
         }

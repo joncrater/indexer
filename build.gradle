@@ -1,6 +1,7 @@
 plugins {
-	id 'java-library'
 	id 'idea'
+	id 'java'
+	id 'distribution'
 }
 
 repositories {
@@ -12,6 +13,19 @@ dependencies {
 	implementation "org.apache.lucene:lucene-core:${luceneVersion}"
 	implementation "org.apache.lucene:lucene-analyzers-common:${luceneVersion}"
 	implementation "commons-cli:commons-cli:${commonsCliVersion}"
-	implementation "org.apache.logging.log4j:log4j-slf4j-impl:${log4jSlf4jVersion}"
+	implementation "org.apache.logging.log4j:log4j-api:${log4j2Version}"
+	implementation "org.apache.logging.log4j:log4j-slf4j-impl:${log4j2Version}"
 	implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+	implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+	implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
+}
+
+distributions {
+	main {
+		contents {
+			from 'build/libs'
+			into 'service/lib'
+		}
+	}
 }
