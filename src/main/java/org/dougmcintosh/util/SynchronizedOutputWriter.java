@@ -35,9 +35,10 @@ public class SynchronizedOutputWriter implements Closeable {
         try {
             writeLock.lock();
             logger.debug("Attempting to write \"{}\"", str);
-            this.writer.write(str);
-            this.writer.newLine();
+            writer.write(str);
+            writer.newLine();
         } catch (Exception e) {
+            // TODO fail indexing if a worker doesn't complete normally
             logger.error("Worker threw exception.", e);
         } finally {
             writeLock.unlock();
