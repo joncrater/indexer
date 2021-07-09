@@ -1,12 +1,18 @@
-package org.dougmcintosh;
+package org.dougmcintosh.index.crawl;
 
 import com.google.common.base.Preconditions;
+import org.dougmcintosh.index.WorkManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Set;
 
+/**
+ * Crawl a provided set of directories for files matching a filter.
+ * Hand those files to the {@link WorkManager} to be added to the
+ * work queue.
+ */
 public class Crawler {
     private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
     private Set<File> directories;

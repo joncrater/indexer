@@ -1,4 +1,4 @@
-package org.dougmcintosh.extract.tika;
+package org.dougmcintosh.index.extract.tika;
 
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.TokenStream;
@@ -7,9 +7,9 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.sax.BodyContentHandler;
-import org.dougmcintosh.IndexingException;
-import org.dougmcintosh.extract.ExtractResult;
-import org.dougmcintosh.extract.lucene.CustomAnalyzer;
+import org.dougmcintosh.index.IndexingException;
+import org.dougmcintosh.index.extract.ExtractResult;
+import org.dougmcintosh.index.extract.lucene.CustomAnalyzer;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

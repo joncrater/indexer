@@ -1,4 +1,4 @@
-package org.dougmcintosh;
+package org.dougmcintosh.index;
 
 public final class IndexingException extends RuntimeException {
     public IndexingException(String message) {
