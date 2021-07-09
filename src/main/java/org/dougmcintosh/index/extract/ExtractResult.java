@@ -1,4 +1,4 @@
-package org.dougmcintosh.extract;
+package org.dougmcintosh.index.extract;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;

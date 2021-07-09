@@ -1,4 +1,4 @@
-package org.dougmcintosh;
+package org.dougmcintosh.index;
 
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -14,9 +15,11 @@ import java.util.concurrent.TimeUnit;
 public class WorkManager implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(WorkManager.class);
     private ExecutorService threadPool;
+    private WorkerFactory workerFactory;
 
-    public WorkManager(int workers) {
+    public WorkManager(int workers, WorkerFactory workerFactory) {
         Preconditions.checkState(workers >= 1, "Workers must be >= 1.");
+        this.workerFactory = Preconditions.checkNotNull(workerFactory, "WorkerFactory is null.");
         this.threadPool = Executors.newFixedThreadPool(workers, new ThreadFactory() {
             private int workerIdx;
 
@@ -29,10 +32,11 @@ public class WorkManager implements Closeable {
 
     public void queueWork(File work) {
         logger.debug("Queueing file {}", work.getAbsolutePath());
+        threadPool.submit(workerFactory.newWorker(work));
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         if (!threadPool.isShutdown()) {
             threadPool.shutdown();
 
@@ -44,6 +48,8 @@ public class WorkManager implements Closeable {
                 Thread.currentThread().interrupt();
                 logger.error("Thread pool interrupted while awaiting worker completion.", e);
                 throw new IndexingException(e);
+            } finally {
+                this.workerFactory.close();
             }
 
             logger.info("Thread pool shutdown complete.");

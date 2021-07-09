@@ -42,11 +42,15 @@ public class IndexerCli {
                     .workers(workers)
                     .recurse(isRecursive)
                     .build();
-            Indexer.with(indexerArgs).index();
+            LunrIndexer.with(indexerArgs).index();
         }
         catch (ParseException e) {
             System.err.println("Failed to parse command line args: " + e.getMessage());
-            e.printStackTrace(System.err);
+            logger.error("Failed to parse command line args.", e);
+        }
+        catch (Throwable t) {
+            t.printStackTrace(System.err);
+            logger.error("Unhandled exception while indexing.", t);
         }
     }
 

@@ -1,4 +1,4 @@
-package org.dougmcintosh;
+package org.dougmcintosh.index.crawl;
 
 import java.io.File;
 
