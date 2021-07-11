@@ -27,7 +27,7 @@ public class LunrIndexer {
 
     public void index() throws IOException {
         final File outputFile = new File(args.getOutputdir(), timestampedFileName());
-        final WorkerFactory workerFactory = new WorkerFactory(outputFile);
+        final WorkerFactory workerFactory = new WorkerFactory(outputFile, args.getStopwordsFile());
 
         try (final WorkManager workMgr = new WorkManager(args.getWorkers(), workerFactory)) {
             Crawler.builder()

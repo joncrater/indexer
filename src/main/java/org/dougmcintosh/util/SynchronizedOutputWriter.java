@@ -38,8 +38,8 @@ public class SynchronizedOutputWriter implements Closeable {
             writer.write(str);
             writer.newLine();
         } catch (Exception e) {
-            // TODO fail indexing if a worker doesn't complete normally
             logger.error("Worker threw exception.", e);
+
         } finally {
             writeLock.unlock();
         }

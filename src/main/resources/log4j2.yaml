@@ -29,7 +29,7 @@ Configuration:
         additivity: false
         AppenderRef:
           - ref: STDOUT
-          #- ref: File
+          - ref: File
     Root:
       level: error
       AppenderRef:

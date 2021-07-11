@@ -1,5 +1,6 @@
 package org.dougmcintosh.index.extract;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,6 +12,7 @@ public final class ExtractResult {
     private File sourceFile;
     private String text;
     private Set<String> tokens = new LinkedHashSet<>();
+    private Joiner joiner = Joiner.on(" ");
 
     private ExtractResult(File sourceFile, String text) {
         this.sourceFile = sourceFile;
@@ -25,5 +27,9 @@ public final class ExtractResult {
 
     public boolean addToken(String token) {
         return this.tokens.add(token);
+    }
+
+    public String tokenString() {
+        return joiner.join(tokens);
     }
 }
