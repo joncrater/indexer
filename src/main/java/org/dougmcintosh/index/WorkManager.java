@@ -56,7 +56,7 @@ public class WorkManager implements Closeable {
             logger.info("Awaiting thread pool shutdown.");
 
             try {
-                threadPool.awaitTermination(5, TimeUnit.MINUTES);
+                threadPool.awaitTermination(1l, TimeUnit.HOURS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 logger.error("Thread pool interrupted while awaiting worker completion.", e);
