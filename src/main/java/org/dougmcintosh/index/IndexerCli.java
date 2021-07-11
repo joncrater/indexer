@@ -47,10 +47,17 @@ public class IndexerCli {
         catch (ParseException e) {
             System.err.println("Failed to parse command line args: " + e.getMessage());
             logger.error("Failed to parse command line args.", e);
+            System.exit(1);
+        }
+        catch (IndexingException e) {
+            System.err.println("One or more indexing tasks failed: " + e.getMessage());
+            logger.error("One or more indexing tasks failed.", e);
+            System.exit(1);
         }
         catch (Throwable t) {
             t.printStackTrace(System.err);
             logger.error("Unhandled exception while indexing.", t);
+            System.exit(1);
         }
     }
 

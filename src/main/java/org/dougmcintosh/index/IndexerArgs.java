@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class IndexerArgs {
     private Set<File> inputdirs;
     private File outputdir;
-    private File stopwordsFile;
+    private Optional<File> stopwordsFile;
     private boolean recurse;
     private int workers;
 
@@ -52,8 +52,11 @@ public class IndexerArgs {
 
     private void initStopWordsFile(Optional<String> stopwordsPath) {
         if (stopwordsPath.isPresent()) {
-            this.stopwordsFile = new File(stopwordsPath.get());
-            Preconditions.checkState(stopwordsFile.isFile(), "Stopwords path doesn't exist or isn't a file.;");
+            this.stopwordsFile = Optional.of(new File(stopwordsPath.get()));
+            Preconditions.checkState(stopwordsFile.get().isFile(), "Stopwords path doesn't exist or isn't a file.;");
+        }
+        else {
+            this.stopwordsFile = Optional.empty();
         }
     }
 
@@ -69,7 +72,7 @@ public class IndexerArgs {
         return outputdir;
     }
 
-    public File getStopwordsFile() {
+    public Optional<File> getStopwordsFile() {
         return stopwordsFile;
     }
 
