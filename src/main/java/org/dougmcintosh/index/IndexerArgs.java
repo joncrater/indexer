@@ -37,25 +37,24 @@ public class IndexerArgs {
 
     private void initInputDirs(Set<String> inputDirPaths) {
         this.inputdirs = inputDirPaths.stream().map(
-                s -> new File(s)).collect(Collectors.toCollection(LinkedHashSet::new));
+            s -> new File(s)).collect(Collectors.toCollection(LinkedHashSet::new));
 
         this.inputdirs.stream().forEach(d ->
             Preconditions.checkState(d.isDirectory(),
-                    "Input directory does not exist or isn't a directory: " + d.getAbsolutePath()));
+                "Input directory does not exist or isn't a directory: " + d.getAbsolutePath()));
     }
 
     private void initOutputDir(String outputdirPath) {
         this.outputdir = new File(outputdirPath);
         Preconditions.checkState(outputdir.isDirectory(),
-                "Output directory does not exist or isn't a directory: " + outputdir.getAbsolutePath());
+            "Output directory does not exist or isn't a directory: " + outputdir.getAbsolutePath());
     }
 
     private void initStopWordsFile(Optional<String> stopwordsPath) {
         if (stopwordsPath.isPresent()) {
             this.stopwordsFile = Optional.of(new File(stopwordsPath.get()));
             Preconditions.checkState(stopwordsFile.get().isFile(), "Stopwords path doesn't exist or isn't a file.;");
-        }
-        else {
+        } else {
             this.stopwordsFile = Optional.empty();
         }
     }

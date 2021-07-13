@@ -50,8 +50,8 @@ public class TikaExtractor {
 
                 try (final CustomAnalyzer analyzer = new CustomAnalyzer(stopWords);
                      final TokenStream tokenStream = analyzer.tokenStream("text",
-                             new InputStreamReader(
-                                     new ByteArrayInputStream(rawText.getBytes(StandardCharsets.UTF_8))))) {
+                         new InputStreamReader(
+                             new ByteArrayInputStream(rawText.getBytes(StandardCharsets.UTF_8))))) {
 
                     tokenStream.reset();
                     while (tokenStream.incrementToken()) {
@@ -59,8 +59,7 @@ public class TikaExtractor {
                     }
                     tokenStream.end();
                 }
-            }
-            else {
+            } else {
                 logger.warn("No text extracted from file {}", sourceFile.getAbsolutePath());
             }
         } catch (Exception e) {
@@ -85,11 +84,11 @@ public class TikaExtractor {
             final List<String> stopWordsList;
             try {
                 stopWordsList = CharStreams.readLines(
-                        new InputStreamReader(
-                                new FileInputStream(stopwordsFile.get()), StandardCharsets.UTF_8));
+                    new InputStreamReader(
+                        new FileInputStream(stopwordsFile.get()), StandardCharsets.UTF_8));
                 stopWords.addAll(stopWordsList);
             } catch (IOException e) {
-                throw new IndexingException("Error reading stopwords file: " + stopwordsFile.get().getAbsolutePath());
+                throw new IndexingException("Error reading stop words file: " + stopwordsFile.get().getAbsolutePath());
             }
         }
         return stopWords;

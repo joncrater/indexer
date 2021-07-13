@@ -36,25 +36,22 @@ public class IndexerCli {
             final int workers = ((Long) cli.getParsedOptionValue(OPT_WORKERS)).intValue();
 
             final IndexerArgs indexerArgs = IndexerArgs.builder()
-                    .inputdirPaths(inputdirPaths)
-                    .outputdirPath(outputdirPath)
-                    .stopwordsPath(stopWordsPath)
-                    .workers(workers)
-                    .recurse(isRecursive)
-                    .build();
+                .inputdirPaths(inputdirPaths)
+                .outputdirPath(outputdirPath)
+                .stopwordsPath(stopWordsPath)
+                .workers(workers)
+                .recurse(isRecursive)
+                .build();
             LunrIndexer.with(indexerArgs).index();
-        }
-        catch (ParseException e) {
+        } catch (ParseException e) {
             System.err.println("Failed to parse command line args: " + e.getMessage());
             logger.error("Failed to parse command line args.", e);
             System.exit(1);
-        }
-        catch (IndexingException e) {
+        } catch (IndexingException e) {
             System.err.println("One or more indexing tasks failed: " + e.getMessage());
             logger.error("One or more indexing tasks failed.", e);
             System.exit(1);
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace(System.err);
             logger.error("Unhandled exception while indexing.", t);
             System.exit(1);
@@ -64,36 +61,36 @@ public class IndexerCli {
     private static Options setupOptions() {
         Options opts = new Options();
         opts.addOption(Option.builder(OPT_INPUT_DIR)
-                .desc("One or more input directories to scan for pdf files.")
-                .longOpt("inputDir")
-                .required()
-                .hasArgs()
-                .build());
+            .desc("One or more input directories to scan for pdf files.")
+            .longOpt("inputDir")
+            .required()
+            .hasArgs()
+            .build());
         opts.addOption(Option.builder(OPT_OUTPUT_DIR)
-                .desc("Output directory where index will be written.")
-                .longOpt("outputDir")
-                .required()
-                .hasArg()
-                .build());
+            .desc("Output directory where index will be written.")
+            .longOpt("outputDir")
+            .required()
+            .hasArg()
+            .build());
         opts.addOption(Option.builder(OPT_STOP_WORDS_PATH)
-                .desc("Path to file containing stop words, one per line.")
-                .longOpt("stopwordsFile")
-                .required(false)
-                .hasArg()
-                .build());
+            .desc("Path to file containing stop words, one per line.")
+            .longOpt("stopwordsFile")
+            .required(false)
+            .hasArg()
+            .build());
         opts.addOption(Option.builder(OPT_RECURSE)
-                .desc("Recursively process provided directory.")
-                .longOpt("recurse")
-                .hasArg(false)
-                .required(false)
-                .build());
+            .desc("Recursively process provided directory.")
+            .longOpt("recurse")
+            .hasArg(false)
+            .required(false)
+            .build());
         opts.addOption(Option.builder(OPT_WORKERS)
-                .desc("Number of worker threads that will consume the work queue.")
-                .longOpt("workers")
-                .required(false)
-                .hasArg()
-                .type(Number.class)
-                .build());
+            .desc("Number of worker threads that will consume the work queue.")
+            .longOpt("workers")
+            .required(false)
+            .hasArg()
+            .type(Number.class)
+            .build());
         return opts;
     }
 }

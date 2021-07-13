@@ -31,18 +31,18 @@ public class LunrIndexer {
 
         try (final WorkManager workMgr = new WorkManager(args.getWorkers(), workerFactory)) {
             Crawler.builder()
-                    .directories(args.getInputdirs())
-                    .filter(file -> file.isDirectory() || file.isFile() && FILE_PATTERN.matcher(file.getName()).matches())
-                    .workManager(workMgr)
-                    .recurse(args.isRecurse())
-                    .build()
-                    .crawl();
+                .directories(args.getInputdirs())
+                .filter(file -> file.isDirectory() || file.isFile() && FILE_PATTERN.matcher(file.getName()).matches())
+                .workManager(workMgr)
+                .recurse(args.isRecurse())
+                .build()
+                .crawl();
         }
     }
 
     private String timestampedFileName() {
         return String.format(
-                "lunr-%s.js",
-                DateTimeFormatter.ofPattern(TIME_PATTERN).format(LocalDateTime.now()));
+            "lunr-%s.js",
+            DateTimeFormatter.ofPattern(TIME_PATTERN).format(LocalDateTime.now()));
     }
 }

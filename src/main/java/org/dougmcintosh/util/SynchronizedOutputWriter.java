@@ -1,6 +1,7 @@
 package org.dougmcintosh.util;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.dougmcintosh.index.IndexingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class SynchronizedOutputWriter implements Closeable {
     public SynchronizedOutputWriter(File outputFile) throws IOException {
         Preconditions.checkNotNull(outputFile, "Output file is null.");
         Preconditions.checkState(!outputFile.exists(),
-                "Output file already exists: " + outputFile.getAbsolutePath());
+            "Output file already exists: " + outputFile.getAbsolutePath());
         this.outputFile = outputFile;
         this.writer = new BufferedWriter(new FileWriter(outputFile));
         this.writeLock = new ReentrantLock();
@@ -32,16 +33,17 @@ public class SynchronizedOutputWriter implements Closeable {
     }
 
     public void write(final String str) throws IndexingException {
-        try {
-            writeLock.lock();
-            logger.debug("Attempting to write \"{}\"", str);
-            writer.write(str);
-            writer.newLine();
-        } catch (Exception e) {
-            logger.error("Worker threw exception.", e);
-
-        } finally {
-            writeLock.unlock();
+        if (StringUtils.isNotBlank(str)) {
+            try {
+                writeLock.lock();
+                logger.debug("Attempting to write \"{}\"", str);
+                writer.write(str);
+                writer.newLine();
+            } catch (Exception e) {
+                logger.error("Worker threw exception.", e);
+            } finally {
+                writeLock.unlock();
+            }
         }
     }
 
