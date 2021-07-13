@@ -18,7 +18,7 @@ public class WorkerFactory implements Closeable {
 
     public WorkerFactory(File outputFile, Optional<File> stopwordsFile) throws IOException {
         Preconditions.checkState(!outputFile.exists(),
-                "Output file already exists: " + outputFile.getAbsolutePath());
+            "Output file already exists: " + outputFile.getAbsolutePath());
         this.writer = new SynchronizedOutputWriter(outputFile);
         this.stopwordsFile = stopwordsFile;
     }

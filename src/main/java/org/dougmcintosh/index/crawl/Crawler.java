@@ -25,7 +25,7 @@ public class Crawler {
         Preconditions.checkState(!this.directories.isEmpty(), "No crawl directories provided.");
         for (File dir : this.directories) {
             Preconditions.checkState(dir.isDirectory(),
-                    "Provided directory does not exist or is not a directories: " + dir.getAbsolutePath());
+                "Provided directory does not exist or is not a directories: " + dir.getAbsolutePath());
         }
         this.workManager = Preconditions.checkNotNull(workManager, "WorkManager is null.");
         this.filter = Preconditions.checkNotNull(filter);

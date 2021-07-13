@@ -4,6 +4,7 @@ public final class IndexingException extends RuntimeException {
     public IndexingException(String message) {
         super(message);
     }
+
     public IndexingException(Throwable cause) {
         super(cause);
     }

@@ -8,26 +8,35 @@ import java.io.Reader;
 
 public class CustomAnalyzer extends StopwordAnalyzerBase {
 
-    /** Default maximum allowed token length */
+    /**
+     * Default maximum allowed token length
+     */
     public static final int DEFAULT_MAX_TOKEN_LENGTH = 255;
 
     private int maxTokenLength = DEFAULT_MAX_TOKEN_LENGTH;
 
-    /** Builds an analyzer with the given stop words.
-     * @param stopWords stop words */
+    /**
+     * Builds an analyzer with the given stop words.
+     *
+     * @param stopWords stop words
+     */
     public CustomAnalyzer(CharArraySet stopWords) {
         super(stopWords);
     }
 
-    /** Builds an analyzer with no stop words.
+    /**
+     * Builds an analyzer with no stop words.
      */
     public CustomAnalyzer() {
         this(CharArraySet.EMPTY_SET);
     }
 
-    /** Builds an analyzer with the stop words from the given reader.
+    /**
+     * Builds an analyzer with the stop words from the given reader.
+     *
+     * @param stopwords Reader to read stop words from
      * @see WordlistLoader#getWordSet(Reader)
-     * @param stopwords Reader to read stop words from */
+     */
     public CustomAnalyzer(Reader stopwords) throws IOException {
         this(loadStopwordSet(stopwords));
     }
@@ -43,9 +52,11 @@ public class CustomAnalyzer extends StopwordAnalyzerBase {
         maxTokenLength = length;
     }
 
-    /** Returns the current maximum token length
+    /**
+     * Returns the current maximum token length
      *
-     *  @see #setMaxTokenLength */
+     * @see #setMaxTokenLength
+     */
     public int getMaxTokenLength() {
         return maxTokenLength;
     }
