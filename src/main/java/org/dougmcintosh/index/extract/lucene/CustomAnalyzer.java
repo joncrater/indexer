@@ -1,5 +1,6 @@
 package org.dougmcintosh.index.extract.lucene;
 
+import com.google.common.base.Preconditions;
 import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 
@@ -13,7 +14,14 @@ public class CustomAnalyzer extends StopwordAnalyzerBase {
      */
     public static final int DEFAULT_MAX_TOKEN_LENGTH = 255;
 
+    /**
+     * Default minimum allowed token length
+     */
+    public static final int DEFAULT_MIN_TOKEN_LENGTH = 5;
+
     private int maxTokenLength = DEFAULT_MAX_TOKEN_LENGTH;
+
+    private int minTokenLength = DEFAULT_MIN_TOKEN_LENGTH;
 
     /**
      * Builds an analyzer with the given stop words.
@@ -41,6 +49,12 @@ public class CustomAnalyzer extends StopwordAnalyzerBase {
         this(loadStopwordSet(stopwords));
     }
 
+    public CustomAnalyzer(CharArraySet stopWords, int minTokenLength) {
+        this(stopWords);
+        Preconditions.checkState(minTokenLength >= 1, "Min token length must be >= 1.");
+        setMinTokenLength(minTokenLength);
+    }
+
     /**
      * Set the max allowed token length.  Tokens larger than this will be chopped
      * up at this token length and emitted as multiple tokens.  If you need to
@@ -50,6 +64,15 @@ public class CustomAnalyzer extends StopwordAnalyzerBase {
      */
     public void setMaxTokenLength(int length) {
         maxTokenLength = length;
+    }
+
+    /**
+     * Set the minimum allowed token length.  Tokens shorter than this will be
+     * ignored. The default is
+     * {@link CustomAnalyzer#DEFAULT_MIN_TOKEN_LENGTH}.
+     */
+    public void setMinTokenLength(int length) {
+        minTokenLength = length;
     }
 
     /**
@@ -67,7 +90,7 @@ public class CustomAnalyzer extends StopwordAnalyzerBase {
         src.setMaxTokenLength(maxTokenLength);
         TokenStream tokenStream = new LowerCaseFilter(src);
         tokenStream = new StopFilter(tokenStream, stopwords);
-        tokenStream = new LengthFilter(tokenStream, 10, maxTokenLength);
+        tokenStream = new LengthFilter(tokenStream, minTokenLength, maxTokenLength);
         return new TokenStreamComponents(r -> {
             src.setMaxTokenLength(CustomAnalyzer.this.maxTokenLength);
             src.setReader(r);

@@ -3,6 +3,7 @@ package org.dougmcintosh.util;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.dougmcintosh.index.IndexingException;
+import org.dougmcintosh.index.extract.ExtractResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

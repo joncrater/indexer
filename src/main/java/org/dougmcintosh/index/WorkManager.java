@@ -3,6 +3,7 @@ package org.dougmcintosh.index;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ucar.ma2.Index;
 
 import java.io.Closeable;
 import java.io.File;
@@ -29,8 +30,17 @@ public class WorkManager implements Closeable {
             private Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
                 @Override
                 public void uncaughtException(Thread t, Throwable e) {
-                    logger.error("Uncaught exception in worker {}", t.getName(), e);
                     failureDetected.set(true);
+                    Metrics.failure();
+
+                    if (e instanceof IndexingException) {
+                        IndexingException ex = (IndexingException) e;
+                        if (ex.getTarget() != null) {
+                            logger.error("Uncaught exception while indexing {}", ex.getTarget().getAbsolutePath(), ex);
+                            return;
+                        }
+                    }
+                    logger.error("Uncaught exception in worker {}", t.getName(), e);
                 }
             };
 
@@ -44,6 +54,7 @@ public class WorkManager implements Closeable {
     }
 
     public void queueWork(File work) {
+        Metrics.fileSeen();
         logger.debug("Queueing file {}", work.getAbsolutePath());
         threadPool.execute(workerFactory.newWorker(work));
     }

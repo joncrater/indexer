@@ -13,26 +13,31 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class IndexerArgs {
+    private static final int DEFAULT_WORKERS = 6;
+    private static final int DEFAULT_MIN_TOKEN_LENGTH = 5;
     private Set<File> inputdirs;
     private File outputdir;
-    private Optional<File> stopwordsFile;
-    private boolean recurse;
-    private int workers;
+    private File stopwordsFile;
+    private final boolean recurse;
+    private final int workers;
+    private final int minTokenLength;
 
     private IndexerArgs(Set<String> inputDirPaths,
                         String outputdirPath,
                         Optional<String> stopwordsPath,
                         boolean recurse,
-                        int workers) {
+                        Optional<Integer> workers,
+                        Optional<Integer> minTokenLength) {
         Preconditions.checkState(CollectionUtils.isNotEmpty(inputDirPaths), "Input dir paths is null/empty.");
         Preconditions.checkState(StringUtils.isNotBlank(outputdirPath), "outputdirPath is null/blank.");
 
         initInputDirs(inputDirPaths);
         initOutputDir(outputdirPath);
         initStopWordsFile(stopwordsPath);
-        Preconditions.checkState(workers >= 1, "Workers must be >= 1.");
         this.recurse = recurse;
-        this.workers = workers;
+        this.workers = workers.orElse(DEFAULT_WORKERS);
+        this.minTokenLength = minTokenLength.orElse(DEFAULT_MIN_TOKEN_LENGTH);
+        Preconditions.checkState(this.workers >= 1, "Workers must be >= 1.");
     }
 
     private void initInputDirs(Set<String> inputDirPaths) {
@@ -52,10 +57,8 @@ public class IndexerArgs {
 
     private void initStopWordsFile(Optional<String> stopwordsPath) {
         if (stopwordsPath.isPresent()) {
-            this.stopwordsFile = Optional.of(new File(stopwordsPath.get()));
-            Preconditions.checkState(stopwordsFile.get().isFile(), "Stopwords path doesn't exist or isn't a file.;");
-        } else {
-            this.stopwordsFile = Optional.empty();
+            this.stopwordsFile = new File(stopwordsPath.get());
+            Preconditions.checkState(stopwordsFile.isFile(), "Stopwords path doesn't exist or isn't a file.;");
         }
     }
 
@@ -71,7 +74,7 @@ public class IndexerArgs {
         return outputdir;
     }
 
-    public Optional<File> getStopwordsFile() {
+    public File getStopwordsFile() {
         return stopwordsFile;
     }
 
@@ -83,12 +86,17 @@ public class IndexerArgs {
         return workers;
     }
 
+    public int getMinTokenLength() {
+        return minTokenLength;
+    }
+
     public static class Builder {
         private Set<String> inputdirPaths;
         private String outputdirPath;
-        private Optional<String> stopwordsPath;
+        private Optional<String> stopwordsPath = Optional.empty();
         private boolean recurse = true;
-        private Integer workers = 10;
+        private Optional<Integer> workers = Optional.empty();
+        private Optional<Integer> minTokenLength = Optional.empty();
 
         public Builder inputdirPaths(String[] inputdirPaths) {
             if (ArrayUtils.isNotEmpty(inputdirPaths)) {
@@ -112,13 +120,18 @@ public class IndexerArgs {
             return this;
         }
 
-        public Builder workers(int workers) {
+        public Builder workers(Optional<Integer> workers) {
             this.workers = workers;
             return this;
         }
 
+        public Builder minTokenLength(Optional<Integer> minTokenLength) {
+            this.minTokenLength = minTokenLength;
+            return this;
+        }
+
         public IndexerArgs build() {
-            return new IndexerArgs(inputdirPaths, outputdirPath, stopwordsPath, recurse, workers);
+            return new IndexerArgs(inputdirPaths, outputdirPath, stopwordsPath, recurse, workers, minTokenLength);
         }
     }
 }

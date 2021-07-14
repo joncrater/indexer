@@ -21,6 +21,7 @@ public class IndexerCli {
     private static final String OPT_STOP_WORDS_PATH = "s";
     private static final String OPT_RECURSE = "r";
     private static final String OPT_WORKERS = "w";
+    private static final String OPT_MIN_TOKEN_LENGTH = "l";
 
     public static void main(String... args) {
         final Options opts = setupOptions();
@@ -33,7 +34,8 @@ public class IndexerCli {
             final String outputdirPath = cli.getOptionValue(OPT_OUTPUT_DIR);
             final Optional<String> stopWordsPath = Optional.ofNullable(cli.getOptionValue(OPT_STOP_WORDS_PATH));
             final boolean isRecursive = cli.hasOption(OPT_RECURSE);
-            final int workers = ((Long) cli.getParsedOptionValue(OPT_WORKERS)).intValue();
+            final Optional<Integer> workers = optionalInteger(cli, OPT_WORKERS);
+            final Optional<Integer> minTokenLength = optionalInteger(cli, OPT_MIN_TOKEN_LENGTH);
 
             final IndexerArgs indexerArgs = IndexerArgs.builder()
                 .inputdirPaths(inputdirPaths)
@@ -41,7 +43,9 @@ public class IndexerCli {
                 .stopwordsPath(stopWordsPath)
                 .workers(workers)
                 .recurse(isRecursive)
+                .minTokenLength(minTokenLength)
                 .build();
+
             LunrIndexer.with(indexerArgs).index();
         } catch (ParseException e) {
             System.err.println("Failed to parse command line args: " + e.getMessage());
@@ -89,8 +93,21 @@ public class IndexerCli {
             .longOpt("workers")
             .required(false)
             .hasArg()
-            .type(Number.class)
+            .build());
+        opts.addOption(Option.builder(OPT_MIN_TOKEN_LENGTH)
+            .desc("Minimum number of characters required for a keyword to be indexed.")
+            .longOpt("minTokenLength")
+            .required(false)
+            .hasArg()
             .build());
         return opts;
+    }
+
+    private static Optional<Integer> optionalInteger(CommandLine cli, String opt) {
+        Optional<Integer> result = Optional.empty();
+        if (cli.hasOption(opt)) {
+            result = Optional.of(Integer.valueOf(cli.getOptionValue(opt)));
+        }
+        return result;
     }
 }

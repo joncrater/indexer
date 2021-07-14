@@ -25,11 +25,23 @@ public final class ExtractResult {
         return new ExtractResult(sourceFile, text);
     }
 
+    public String getText() {
+        return this.text;
+    }
+
+    public File getSourceFile() {
+        return sourceFile;
+    }
+
     public boolean addToken(String token) {
         return this.tokens.add(token);
     }
 
     public String tokenString() {
         return joiner.join(tokens);
+    }
+
+    public boolean hasTokens() {
+        return !tokens.isEmpty();
     }
 }
