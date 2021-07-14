@@ -21,13 +21,15 @@ public class IndexerArgs {
     private final boolean recurse;
     private final int workers;
     private final int minTokenLength;
+    private boolean compress;
 
     private IndexerArgs(Set<String> inputDirPaths,
                         String outputdirPath,
                         Optional<String> stopwordsPath,
                         boolean recurse,
                         Optional<Integer> workers,
-                        Optional<Integer> minTokenLength) {
+                        Optional<Integer> minTokenLength,
+                        boolean compress) {
         Preconditions.checkState(CollectionUtils.isNotEmpty(inputDirPaths), "Input dir paths is null/empty.");
         Preconditions.checkState(StringUtils.isNotBlank(outputdirPath), "outputdirPath is null/blank.");
 
@@ -90,6 +92,10 @@ public class IndexerArgs {
         return minTokenLength;
     }
 
+    public boolean isCompressed() {
+        return compress;
+    }
+
     public static class Builder {
         private Set<String> inputdirPaths;
         private String outputdirPath;
@@ -97,6 +103,7 @@ public class IndexerArgs {
         private boolean recurse = true;
         private Optional<Integer> workers = Optional.empty();
         private Optional<Integer> minTokenLength = Optional.empty();
+        private boolean compress = true;
 
         public Builder inputdirPaths(String[] inputdirPaths) {
             if (ArrayUtils.isNotEmpty(inputdirPaths)) {
@@ -115,8 +122,8 @@ public class IndexerArgs {
             return this;
         }
 
-        public Builder recurse(boolean recurse) {
-            this.recurse = recurse;
+        public Builder recurse(boolean flag) {
+            this.recurse = flag;
             return this;
         }
 
@@ -130,8 +137,15 @@ public class IndexerArgs {
             return this;
         }
 
+        public Builder compress(boolean flag) {
+            this.compress = flag;
+            return this;
+        }
+
         public IndexerArgs build() {
-            return new IndexerArgs(inputdirPaths, outputdirPath, stopwordsPath, recurse, workers, minTokenLength);
+            return new IndexerArgs(
+                inputdirPaths, outputdirPath, stopwordsPath,
+                recurse, workers, minTokenLength, compress);
         }
     }
 }

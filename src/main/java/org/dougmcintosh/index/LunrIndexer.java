@@ -35,7 +35,7 @@ public class LunrIndexer {
         stopwatch.start();
         LuceneWrapper.initializeStopWords(args.getStopwordsFile());
         final File outputFile = new File(args.getOutputdir(), timestampedFileName());
-        final WorkerFactory workerFactory = new WorkerFactory(outputFile, args.getMinTokenLength());
+        final WorkerFactory workerFactory = new WorkerFactory(outputFile, args.getMinTokenLength(), args.isCompressed());
 
         try (final WorkManager workMgr = new WorkManager(args.getWorkers(), workerFactory)) {
             Crawler.builder()
@@ -55,8 +55,12 @@ public class LunrIndexer {
     }
 
     private String timestampedFileName() {
+        String template = "lunr-%s.js";
+        if (args.isCompressed()) {
+            template += ".gz";
+        }
         return String.format(
-            "lunr-%s.js",
+            template,
             DateTimeFormatter.ofPattern(TIME_PATTERN).format(LocalDateTime.now()));
     }
 }

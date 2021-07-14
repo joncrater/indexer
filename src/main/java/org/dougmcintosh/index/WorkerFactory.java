@@ -19,10 +19,10 @@ public class WorkerFactory implements Closeable {
     private final SynchronizedOutputWriter writer;
     private final int minTokenLength;
 
-    public WorkerFactory(File outputFile, int minTokenLength) throws IOException {
+    public WorkerFactory(File outputFile, int minTokenLength, boolean compress) throws IOException {
         Preconditions.checkState(!outputFile.exists(),
             "Output file already exists: " + outputFile.getAbsolutePath());
-        this.writer = new SynchronizedOutputWriter(outputFile);
+        this.writer = new SynchronizedOutputWriter(outputFile, compress);
         this.minTokenLength = minTokenLength;
     }
 
@@ -57,7 +57,12 @@ public class WorkerFactory implements Closeable {
                 stopwatch.start();
                 final ExtractResult extraction = extractOpt.get();
                 LuceneWrapper.tokenize(extraction, minTokenLength);
-                writer.write(extraction.tokenString());
+                IndexEntry entry = IndexEntry.builder()
+                    .audio(sourceFile.getName().replaceAll("\\.pdf$", ".mp3"))
+                    .pdf(sourceFile.getName())
+                    .keywords(extraction.tokenString())
+                    .build();
+                writer.write(entry);
 
                 if (logger.isTraceEnabled()) {
                     logger.trace("Indexed {} in {} ms.", sourceFile.getAbsolutePath(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
