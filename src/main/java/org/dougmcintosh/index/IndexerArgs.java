@@ -22,6 +22,7 @@ public class IndexerArgs {
     private final int workers;
     private final int minTokenLength;
     private boolean compress;
+    private boolean prettyPrint;
 
     private IndexerArgs(Set<String> inputDirPaths,
                         String outputdirPath,
@@ -29,16 +30,20 @@ public class IndexerArgs {
                         boolean recurse,
                         Optional<Integer> workers,
                         Optional<Integer> minTokenLength,
-                        boolean compress) {
+                        boolean compress,
+                        boolean prettyPrint) {
         Preconditions.checkState(CollectionUtils.isNotEmpty(inputDirPaths), "Input dir paths is null/empty.");
         Preconditions.checkState(StringUtils.isNotBlank(outputdirPath), "outputdirPath is null/blank.");
 
         initInputDirs(inputDirPaths);
         initOutputDir(outputdirPath);
         initStopWordsFile(stopwordsPath);
+
         this.recurse = recurse;
-        this.workers = workers.orElse(DEFAULT_WORKERS);
         this.minTokenLength = minTokenLength.orElse(DEFAULT_MIN_TOKEN_LENGTH);
+        this.compress = compress;
+        this.prettyPrint = prettyPrint;
+        this.workers = workers.orElse(DEFAULT_WORKERS);
         Preconditions.checkState(this.workers >= 1, "Workers must be >= 1.");
     }
 
@@ -96,6 +101,10 @@ public class IndexerArgs {
         return compress;
     }
 
+    public boolean isPrettyPrint() {
+        return compress;
+    }
+
     public static class Builder {
         private Set<String> inputdirPaths;
         private String outputdirPath;
@@ -104,6 +113,7 @@ public class IndexerArgs {
         private Optional<Integer> workers = Optional.empty();
         private Optional<Integer> minTokenLength = Optional.empty();
         private boolean compress = true;
+        private boolean prettyPrint = false;
 
         public Builder inputdirPaths(String[] inputdirPaths) {
             if (ArrayUtils.isNotEmpty(inputdirPaths)) {
@@ -142,10 +152,15 @@ public class IndexerArgs {
             return this;
         }
 
+        public Builder prettyPrint(boolean flag) {
+            this.prettyPrint = flag;
+            return this;
+        }
+
         public IndexerArgs build() {
             return new IndexerArgs(
                 inputdirPaths, outputdirPath, stopwordsPath,
-                recurse, workers, minTokenLength, compress);
+                recurse, workers, minTokenLength, compress, prettyPrint);
         }
     }
 }

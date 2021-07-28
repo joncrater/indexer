@@ -1,11 +1,15 @@
 package org.dougmcintosh.index;
 
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
+
 public class IndexEntry {
     private String pdf;
     private String audio;
     private String keywords;
 
     private IndexEntry(String pdf, String audio, String keywords) {
+        Preconditions.checkState(StringUtils.isNotBlank(pdf), "PDF is null/empty.");
         this.pdf = pdf;
         this.audio = audio;
         this.keywords = keywords;
@@ -25,6 +29,11 @@ public class IndexEntry {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    @Override
+    public String toString() {
+        return pdf;
     }
 
     public static class Builder {

@@ -19,10 +19,8 @@ public class WorkerFactory implements Closeable {
     private final SynchronizedOutputWriter writer;
     private final int minTokenLength;
 
-    public WorkerFactory(File outputFile, int minTokenLength, boolean compress) throws IOException {
-        Preconditions.checkState(!outputFile.exists(),
-            "Output file already exists: " + outputFile.getAbsolutePath());
-        this.writer = new SynchronizedOutputWriter(outputFile, compress);
+    public WorkerFactory(SynchronizedOutputWriter writer, int minTokenLength) throws IOException {
+        this.writer = Preconditions.checkNotNull(writer, "Writer is null.");
         this.minTokenLength = minTokenLength;
     }
 
@@ -52,17 +50,17 @@ public class WorkerFactory implements Closeable {
         @Override
         public void run() {
             logger.info("Processing source file {}", sourceFile.getAbsolutePath());
-            Optional<ExtractResult> extractOpt = new TikaExtractor().extract(sourceFile);
+            Optional<ExtractResult> extractOpt = TikaExtractor.extract(sourceFile);
             if (extractOpt.isPresent()) {
                 stopwatch.start();
                 final ExtractResult extraction = extractOpt.get();
                 LuceneWrapper.tokenize(extraction, minTokenLength);
-                IndexEntry entry = IndexEntry.builder()
-                    .audio(sourceFile.getName().replaceAll("\\.pdf$", ".mp3"))
-                    .pdf(sourceFile.getName())
-                    .keywords(extraction.tokenString())
-                    .build();
-                writer.write(entry);
+                writer.write(
+                    IndexEntry.builder()
+                        .audio(sourceFile.getName().replaceAll("(?i)\\.pdf$", ".mp3"))
+                        .pdf(sourceFile.getName())
+                        .keywords(extraction.tokenString())
+                        .build());
 
                 if (logger.isTraceEnabled()) {
                     logger.trace("Indexed {} in {} ms.", sourceFile.getAbsolutePath(), stopwatch.elapsed(TimeUnit.MILLISECONDS));

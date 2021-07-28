@@ -46,10 +46,14 @@ public class Crawler {
 
     private void crawlInternal(File[] candidates) {
         for (File candidate : candidates) {
-            if (candidate.isDirectory() && recurse) {
-                logger.trace("Starting crawl of {}", candidate.getAbsolutePath());
-                crawlInternal(candidate.listFiles(f -> filter.allows(f)));
-                logger.trace("Completed crawl of {}", candidate.getAbsolutePath());
+            if (candidate.isDirectory()) {
+                if (recurse) {
+                    logger.trace("Starting crawl of {}", candidate.getAbsolutePath());
+                    crawlInternal(candidate.listFiles(f -> filter.allows(f)));
+                    logger.trace("Completed crawl of {}", candidate.getAbsolutePath());
+                } else {
+                    logger.debug("Directory recursion is disabled. Ignoring directory {}", candidate.getAbsolutePath());
+                }
             } else if (filter.allows(candidate)) {
                 workManager.queueWork(candidate);
             }
