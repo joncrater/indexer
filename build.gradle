@@ -22,11 +22,33 @@ dependencies {
 	implementation "com.google.guava:guava:${guavaVersion}"
 }
 
+plugins.withType(DistributionPlugin) {
+	distTar {
+		compression = Compression.GZIP
+		extension = 'tgz'
+	}
+}
+
+task copyDeps(type: Copy) {
+	dependsOn 'jar'
+	from configurations.runtimeClasspath
+	into 'build/libs'
+}
+
+tasks.distTar.dependsOn('copyDeps')
+
 distributions {
 	main {
+		distributionBaseName = 'mcintosh-indexer'
+
 		contents {
-			from 'build/libs'
-			into 'service/lib'
+			from('scripts/') {
+				into 'bin'
+			}
+			from('build/libs') {
+				into 'service/lib'
+				include '*.jar'
+			}
 		}
 	}
 }

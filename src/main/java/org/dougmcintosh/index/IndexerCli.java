@@ -1,14 +1,11 @@
 package org.dougmcintosh.index;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Optional;
 
 /**
@@ -32,6 +29,8 @@ public class IndexerCli {
     private static final String OPT_COMPRESS_LONG = "compress";
     private static final String OPT_PRETTY_PRINT = "p";
     private static final String OPT_PRETTY_PRINT_LONG = "pretty";
+    private static final String OPT_HELP = "h";
+    private static final String OPT_HELP_LONG = "help";
 
     public static void main(String... args) {
         final Options opts = setupOptions();
@@ -39,7 +38,14 @@ public class IndexerCli {
 
         try {
             final CommandLine cli = parser.parse(opts, args);
-            logger.debug("Parsed command line.");
+
+            if (cli.hasOption(OPT_HELP)) {
+                printUsage(opts);
+                return;
+            }
+
+            logger.info("Parsed command line options.");
+
             final String[] inputdirPaths = cli.getOptionValues(OPT_INPUT_DIR);
             final String outputdirPath = cli.getOptionValue(OPT_OUTPUT_DIR);
             final Optional<String> stopWordsPath = Optional.ofNullable(cli.getOptionValue(OPT_STOP_WORDS_PATH));
@@ -50,20 +56,20 @@ public class IndexerCli {
             final Optional<Integer> minTokenLength = optionalInteger(cli, OPT_MIN_TOKEN_LENGTH);
 
             final IndexerArgs indexerArgs = IndexerArgs.builder()
-                    .inputdirPaths(inputdirPaths)
-                    .outputdirPath(outputdirPath)
-                    .stopwordsPath(stopWordsPath)
-                    .workers(workers)
-                    .recurse(recurse)
-                    .compress(compress)
-                    .prettyPrint(prettyPrint)
-                    .minTokenLength(minTokenLength)
-                    .build();
+                .inputdirPaths(inputdirPaths)
+                .outputdirPath(outputdirPath)
+                .stopwordsPath(stopWordsPath)
+                .workers(workers)
+                .recurse(recurse)
+                .compress(compress)
+                .prettyPrint(prettyPrint)
+                .minTokenLength(minTokenLength)
+                .build();
 
             LunrIndexer.with(indexerArgs).index();
         } catch (ParseException e) {
             System.err.println("Failed to parse command line args: " + e.getMessage());
-            logger.error("Failed to parse command line args.", e);
+            printUsage(opts);
             System.exit(1);
         } catch (IndexingException e) {
             System.err.println("One or more indexing tasks failed: " + e.getMessage());
@@ -76,56 +82,67 @@ public class IndexerCli {
         }
     }
 
+    private static void printUsage(Options opts) {
+        PrintWriter w = new PrintWriter(System.out);
+        new HelpFormatter().printHelp(100, "java -cp <classpath> " + IndexerCli.class.getName() + " <options>", "", opts, "");
+        w.flush();
+    }
+
     private static Options setupOptions() {
         Options opts = new Options();
+        opts.addOption(Option.builder(OPT_HELP)
+            .desc("Print usage help.")
+            .longOpt(OPT_HELP_LONG)
+            .required(false)
+            .build());
         opts.addOption(Option.builder(OPT_INPUT_DIR)
-                .desc("One or more input directories to scan for pdf files.")
-                .longOpt(OPT_INPUT_DIR_LONG)
-                .required()
-                .hasArgs()
-                .build());
+            .desc("One or more input directories to scan for pdf files.")
+            .longOpt(OPT_INPUT_DIR_LONG)
+            .required()
+            .hasArgs()
+            .build());
         opts.addOption(Option.builder(OPT_OUTPUT_DIR)
-                .desc("Output directory where index will be written.")
-                .longOpt(OPT_OUTPUT_DIR_LONG)
-                .required()
-                .hasArg()
-                .build());
+            .desc("Output directory where index will be written.")
+            .longOpt(OPT_OUTPUT_DIR_LONG)
+            .required()
+            .hasArg()
+            .build());
         opts.addOption(Option.builder(OPT_STOP_WORDS_PATH)
-                .desc("Path to file containing stop words, one per line.")
-                .longOpt(OPT_STOP_WORDS_PATH_LONG)
-                .required(false)
-                .hasArg()
-                .build());
+            .desc("Path to file containing stop words, one per line.")
+            .longOpt(OPT_STOP_WORDS_PATH_LONG)
+            .required(false)
+            .hasArg()
+            .build());
         opts.addOption(Option.builder(OPT_RECURSE)
-                .desc("Recursively process provided directory.")
-                .longOpt(OPT_RECURSE_LONG)
-                .hasArg(false)
-                .required(false)
-                .build());
+            .desc("Recursively process provided directory.")
+            .longOpt(OPT_RECURSE_LONG)
+            .hasArg(false)
+            .required(false)
+            .build());
         opts.addOption(Option.builder(OPT_WORKERS)
-                .desc("Number of worker threads that will consume the work queue.")
-                .longOpt(OPT_WORKERS_LONG)
-                .required(false)
-                .hasArg()
-                .build());
+            .desc("Number of worker threads that will consume the work queue.")
+            .longOpt(OPT_WORKERS_LONG)
+            .required(false)
+            .hasArg()
+            .build());
         opts.addOption(Option.builder(OPT_MIN_TOKEN_LENGTH)
-                .desc("Minimum number of characters required for a keyword to be indexed.")
-                .longOpt(OPT_MIN_TOKEN_LENGTH_LONG)
-                .required(false)
-                .hasArg()
-                .build());
+            .desc("Minimum number of characters required for a keyword to be indexed.")
+            .longOpt(OPT_MIN_TOKEN_LENGTH_LONG)
+            .required(false)
+            .hasArg()
+            .build());
         opts.addOption(Option.builder(OPT_COMPRESS)
-                .desc("gzip compress generated index.")
-                .longOpt(OPT_COMPRESS_LONG)
-                .hasArg(false)
-                .required(false)
-                .build());
+            .desc("gzip compress generated index.")
+            .longOpt(OPT_COMPRESS_LONG)
+            .hasArg(false)
+            .required(false)
+            .build());
         opts.addOption(Option.builder(OPT_PRETTY_PRINT)
-                .desc("Pretty print generated json index.")
-                .longOpt(OPT_PRETTY_PRINT_LONG)
-                .hasArg(false)
-                .required(false)
-                .build());
+            .desc("Pretty print generated json index.")
+            .longOpt(OPT_PRETTY_PRINT_LONG)
+            .hasArg(false)
+            .required(false)
+            .build());
         return opts;
     }
 
