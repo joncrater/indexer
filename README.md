@@ -1,6 +1,6 @@
 ## Intro
 
-This cli crawls a given set of input directories (recursively if `-r|--recurse` is provided), extracts the text from any PDF files found and generates a lunrjs (https://lunrjs.com/) compatible index containing an entry for each PDF file encounted. The index entry will contain any keywords not found in the optional stopwords file provided by the `-s|--stopwords` option. If not stopwords file is provided, the default Lucene stopwords will be used. See full list of options below.
+This cli crawls a given set of input directories (recursively if `-r|--recurse` is provided), extracts the text from any PDF files found and generates a lunrjs (https://lunrjs.com/) compatible index containing an entry for each PDF file encounted. The index entry will contain any keywords not found in the optional stopwords file provided by the `-s|--stopwords` option. If no stopwords file is provided, the default Lucene stopwords will be used. See full list of options below.
 
 ## Options
 
@@ -25,6 +25,8 @@ Logging is handled with log4j2 and configured with the `./src/main/resources/log
  The project is built with gradle. Build a distribution tarball with `./gradlew distTar`. This will generate a tarball of the project in `build/distributions`.
  
 ## Run
+
+Java 16 is required to build and run this project. https://openjdk.java.net/projects/jdk/16/
 
 ### In Place With Gradle
 
