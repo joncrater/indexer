@@ -1,6 +1,6 @@
 ## Intro
 
-This cli crawls a given set of input directories (recursively if `-r|--recurse` is provided), extracts the text from any PDF files found and generates a lunrjs (https://lunrjs.com/) compatible index containing an entry for each PDF file encounted. The index entry will contain any keywords not found in the optional stopwords file provided by the `-s|--stopwords` option. If no stopwords file is provided, the default Lucene stopwords will be used. See full list of options below.
+This cli crawls a given set of input directories (recursively if `-r|--recurse` is provided), extracts the text from any PDF files found and generates a lunrjs (https://lunrjs.com/) compatible index containing an entry for each PDF file encountered. The index entry will contain any keywords not found in the optional stopwords file provided by the `-s|--stopwords` option. If no stopwords file is provided, the default Lucene stopwords will be used. See full list of options below.
 
 The generated index is of this form:
 
