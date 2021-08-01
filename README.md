@@ -7,8 +7,8 @@ The generated index is of this form:
 ```
 [
 	{
-		"pdf":"file03.pdf","
-		audio":"file03.mp3",
+		"pdf":"file03.pdf",
+		"audio":"file03.mp3",
 		"keywords":"keyword1 keyword2 keywordN"
 	},
 	{
