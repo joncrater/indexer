@@ -33,6 +33,11 @@ plugins.withType(DistributionPlugin) {
 distributions {
 	main {
 		distributionBaseName = 'mcintosh-indexer'
+		contents {
+			from('var/conf') {
+				into 'var/conf'
+			}
+		}
 	}
 }
 
