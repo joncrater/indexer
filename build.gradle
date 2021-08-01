@@ -2,6 +2,7 @@ plugins {
 	id 'idea'
 	id 'java'
 	id 'distribution'
+	id 'application'
 }
 
 repositories {
@@ -25,32 +26,19 @@ dependencies {
 plugins.withType(DistributionPlugin) {
 	distTar {
 		compression = Compression.GZIP
-		extension = 'tgz'
+		archiveExtension = 'tgz'
 	}
 }
-
-task copyDeps(type: Copy) {
-	dependsOn 'jar'
-	from configurations.runtimeClasspath
-	into 'build/libs'
-}
-
-tasks.distTar.dependsOn('copyDeps')
 
 distributions {
 	main {
 		distributionBaseName = 'mcintosh-indexer'
-
-		contents {
-			from('scripts/') {
-				into 'bin'
-			}
-			from('build/libs') {
-				into 'service/lib'
-				include '*.jar'
-			}
-		}
 	}
+}
+
+application {
+	mainClass = "org.dougmcintosh.index.IndexerCli"
+	applicationDefaultJvmArgs = ['-Xmx4g']
 }
 
 java {

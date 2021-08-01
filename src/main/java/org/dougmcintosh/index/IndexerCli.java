@@ -102,13 +102,13 @@ public class IndexerCli {
             .hasArgs()
             .build());
         opts.addOption(Option.builder(OPT_OUTPUT_DIR)
-            .desc("Output directory where index will be written.")
+            .desc("Output directory (must exist) where index will be written.")
             .longOpt(OPT_OUTPUT_DIR_LONG)
             .required()
             .hasArg()
             .build());
         opts.addOption(Option.builder(OPT_STOP_WORDS_PATH)
-            .desc("Path to file containing stop words, one per line.")
+            .desc("Path to file containing stop words, one per line. Any word in this file will be ignored for indexing.")
             .longOpt(OPT_STOP_WORDS_PATH_LONG)
             .required(false)
             .hasArg()
@@ -120,7 +120,7 @@ public class IndexerCli {
             .required(false)
             .build());
         opts.addOption(Option.builder(OPT_WORKERS)
-            .desc("Number of worker threads that will consume the work queue.")
+            .desc("Number of worker threads that will consume files from the work queue.")
             .longOpt(OPT_WORKERS_LONG)
             .required(false)
             .hasArg()
