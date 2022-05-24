@@ -3,8 +3,10 @@ package org.dougmcintosh.index;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import org.dougmcintosh.index.extract.ExtractResult;
-import org.dougmcintosh.index.extract.lucene.LuceneWrapper;
 import org.dougmcintosh.index.extract.tika.TikaExtractor;
+import org.dougmcintosh.index.lucene.CustomAnalyzer;
+import org.dougmcintosh.index.lucene.LuceneOutputWriter;
+import org.dougmcintosh.index.lunr.LunrOutputWriter;
 import org.dougmcintosh.util.SynchronizedOutputWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,57 +17,121 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class WorkerFactory implements Closeable {
-    private final SynchronizedOutputWriter writer;
-    private final int minTokenLength;
+public abstract class WorkerFactory implements Closeable {
+    protected final IndexerArgs args;
 
-    public WorkerFactory(SynchronizedOutputWriter writer, int minTokenLength) throws IOException {
-        this.writer = Preconditions.checkNotNull(writer, "Writer is null.");
-        this.minTokenLength = minTokenLength;
+    private WorkerFactory(IndexerArgs args) {
+        this.args = Preconditions.checkNotNull(args, "IndexerArgs cannot be null.");
+        CustomAnalyzer.initializeStopWords(args.getStopwordsFile());
     }
 
-    public Worker newWorker(File sourceFile) {
-        return new Worker(writer, sourceFile);
+    public static WorkerFactory of(IndexerArgs args) throws IOException {
+        return args.getIndexType() == IndexerArgs.IndexType.LUCENE ?
+            new LuceneWorkerFactory(args) : new LunrWorkerFactory(args);
     }
 
-    @Override
-    public void close() throws IOException {
-        if (this.writer != null) {
-            this.writer.close();
+    public abstract Worker newWorker(File sourceFile);
+
+    public static class LuceneWorkerFactory extends WorkerFactory {
+        private final LuceneOutputWriter luceneWriter;
+
+        private LuceneWorkerFactory(IndexerArgs args) throws IOException {
+            super(args);
+            this.luceneWriter = new LuceneOutputWriter(args.getOutputdir(), args.getMinTokenLength());
+        }
+
+        @Override
+        public Worker newWorker(File sourceFile) {
+            return new LuceneWorker(luceneWriter, sourceFile);
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (this.luceneWriter != null) {
+                luceneWriter.close();
+            }
         }
     }
 
-    private class Worker implements Runnable {
-        private static final Logger logger = LoggerFactory.getLogger(Worker.class);
+    public static class LunrWorkerFactory extends WorkerFactory {
+        private final LunrOutputWriter lunrWriter;
+
+        private LunrWorkerFactory(IndexerArgs args) throws IOException {
+            super(args);
+            this.lunrWriter = new LunrOutputWriter(
+                args.getOutputdir(), args.isCompressed(), args.isPrettyPrint());
+        }
+
+        @Override
+        public Worker newWorker(File sourceFile) {
+            return new LunrWorker(lunrWriter, sourceFile);
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (this.lunrWriter != null) {
+                this.lunrWriter.close();
+            }
+        }
+    }
+
+    private abstract static class Worker implements Runnable {
+        protected static final Logger logger = LoggerFactory.getLogger(Worker.class);
         private final SynchronizedOutputWriter writer;
-        private final File sourceFile;
-        private final Stopwatch stopwatch;
+        protected final File sourceFile;
+        protected final Stopwatch stopwatch;
 
         Worker(SynchronizedOutputWriter writer, File sourceFile) {
-            this.writer = Preconditions.checkNotNull(writer, "Writer is null.");
+            this.writer = Preconditions.checkNotNull(writer, "Output writer is null.");
             this.sourceFile = Preconditions.checkNotNull(sourceFile, "Source file is null.");
             this.stopwatch = Stopwatch.createUnstarted();
         }
 
+        protected abstract Optional<ExtractResult> extract();
+
         @Override
         public void run() {
             logger.info("Processing source file {}", sourceFile.getAbsolutePath());
-            Optional<ExtractResult> extractOpt = TikaExtractor.extract(sourceFile);
+
+            Optional<ExtractResult> extractOpt = extract();
+
             if (extractOpt.isPresent()) {
                 stopwatch.start();
                 final ExtractResult extraction = extractOpt.get();
-                LuceneWrapper.tokenize(extraction, minTokenLength);
-                writer.write(
-                    IndexEntry.builder()
-                        .audio(sourceFile.getName().replaceAll("(?i)\\.pdf$", ".mp3"))
-                        .pdf(sourceFile.getName())
-                        .keywords(extraction.tokenString())
-                        .build());
+
+                writer.write(IndexEntry.builder()
+                    .audio(sourceFile.getName().replaceAll("(?i)\\.pdf$", ".mp3"))
+                    .pdf(sourceFile)
+                    .keywords(extraction.tokenString())
+                    .rawText(extraction.getText())
+                    .build());
 
                 if (logger.isTraceEnabled()) {
                     logger.trace("Indexed {} in {} ms.", sourceFile.getAbsolutePath(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
                 }
             }
+        }
+    }
+
+    private static class LuceneWorker extends Worker {
+        LuceneWorker(LuceneOutputWriter luceneWriter, File sourceFile) {
+            super(luceneWriter, sourceFile);
+        }
+
+        @Override
+        protected Optional<ExtractResult> extract() {
+            return TikaExtractor.extract(sourceFile);
+        }
+    }
+
+    private class LunrWorker extends Worker {
+        LunrWorker(SynchronizedOutputWriter writer, File sourceFile) {
+            super(writer, sourceFile);
+        }
+
+        @Override
+        protected Optional<ExtractResult> extract() {
+            return TikaExtractor.extractAndTokenize(sourceFile, args.getMinTokenLength());
         }
     }
 }

@@ -1,21 +1,25 @@
 package org.dougmcintosh.index;
 
 import com.google.common.base.Preconditions;
-import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
 
 public class IndexEntry {
-    private String pdf;
+    private File pdf;
     private String audio;
     private String keywords;
+    private String rawText;
 
-    private IndexEntry(String pdf, String audio, String keywords) {
-        Preconditions.checkState(StringUtils.isNotBlank(pdf), "PDF is null/empty.");
+    private IndexEntry(File pdf, String audio, String keywords, String rawText) {
+        Preconditions.checkNotNull(pdf, "PDF file is null.");
+        Preconditions.checkState(pdf.exists(), "PDF does not exist: %s", pdf.getAbsolutePath());
         this.pdf = pdf;
         this.audio = audio;
         this.keywords = keywords;
+        this.rawText = rawText;
     }
 
-    public String getPdf() {
+    public File getPdf() {
         return pdf;
     }
 
@@ -27,21 +31,26 @@ public class IndexEntry {
         return keywords;
     }
 
+    public String getRawText() {
+        return rawText;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
 
     @Override
     public String toString() {
-        return pdf;
+        return pdf.getAbsolutePath();
     }
 
     public static class Builder {
-        private String pdf;
+        private File pdf;
         private String audio;
         private String keywords;
+        private String rawText;
 
-        public Builder pdf(String pdf) {
+        public Builder pdf(File pdf) {
             this.pdf = pdf;
             return this;
         }
@@ -56,8 +65,13 @@ public class IndexEntry {
             return this;
         }
 
+        public Builder rawText(String rawText) {
+            this.rawText = rawText;
+            return this;
+        }
+
         public IndexEntry build() {
-            return new IndexEntry(pdf, audio, keywords);
+            return new IndexEntry(pdf, audio, keywords, rawText);
         }
     }
 }

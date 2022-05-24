@@ -3,16 +3,23 @@ plugins {
 	id 'java'
 	id 'distribution'
 	id 'application'
+	id 'maven-publish'
+	id 'com.palantir.git-version' version '0.15.0'
 }
 
 repositories {
 	mavenCentral()
 }
 
+group 'org.dougmcintosh'
+version gitVersion()
+
 dependencies {
 	implementation "org.apache.tika:tika-parsers:${tikaVersion}"
 	implementation "org.apache.lucene:lucene-core:${luceneVersion}"
 	implementation "org.apache.lucene:lucene-analyzers-common:${luceneVersion}"
+	implementation "org.apache.lucene:lucene-highlighter:${luceneVersion}"
+	implementation "org.apache.lucene:lucene-queryparser:${luceneVersion}"
 	implementation "commons-cli:commons-cli:${commonsCliVersion}"
 	implementation "org.apache.logging.log4j:log4j-api:${log4j2Version}"
 	implementation "org.apache.logging.log4j:log4j-slf4j-impl:${log4j2Version}"
@@ -49,5 +56,13 @@ application {
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(16)
+	}
+}
+
+publishing {
+	publications {
+		defaultPkg(MavenPublication) {
+			from components.java
+		}
 	}
 }
