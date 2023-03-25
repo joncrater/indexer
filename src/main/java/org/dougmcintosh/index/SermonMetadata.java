@@ -122,17 +122,21 @@ public class SermonMetadata {
                 logger.debug(categoryName + "/" + subcategoryName + "/" + seriesCode + "/" + seriesTitle + "/" +
                     pdf + "/" + audio + "/" + title);
 
-                IndexEntry.Builder replaced = indexEntries.put(pdf, IndexEntry.builder()
+                IndexEntry.Builder builder = IndexEntry.builder()
                     .category(categoryName)
                     .subCategory(subcategoryName)
                     .seriesCode(seriesCode)
                     .seriesTitle(seriesTitle)
                     .pdfRelativePath(pdf)
                     .audio(audio)
-                    .date(LocalDate.parse(date))
                     .sermonTitle(title)
-                    .passage(passage));
+                    .passage(passage);
 
+                if (!date.isEmpty()) {
+                    builder.date(LocalDate.parse(date));
+                }
+
+                IndexEntry.Builder replaced = indexEntries.put(pdf, builder);
                 Preconditions.checkState(replaced == null, "Duplicate pdf entry: " + pdf);
             }
         });
