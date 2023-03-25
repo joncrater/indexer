@@ -55,7 +55,7 @@ public class LuceneOutputWriter extends SynchronizedOutputWriter {
         if (sermonDate != null) {
             doc.add(new StringField(FLD_SERMON_DATE, sermonDate.toString(), Field.Store.YES));
         } else {
-            doc.add(new StringField(FLD_SERMON_DATE, "undated", Field.Store.YES));
+            doc.add(new StringField(FLD_SERMON_DATE, "1970-01-01", Field.Store.YES));
         }
 
         try {
