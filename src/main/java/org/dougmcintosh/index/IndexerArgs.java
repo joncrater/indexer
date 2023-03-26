@@ -18,11 +18,17 @@ public class IndexerArgs {
     private Set<File> inputdirs;
     private File outputdir;
     private File stopwordsFile;
+    private File sermonMetadataFile;
     private final boolean recurse;
     private final int workers;
     private final int minTokenLength;
     private boolean compress;
     private boolean prettyPrint;
+    private final IndexType indexType;
+
+    enum IndexType {
+        LUCENE, LUNR
+    }
 
     private IndexerArgs(Set<String> inputDirPaths,
                         String outputdirPath,
@@ -30,6 +36,8 @@ public class IndexerArgs {
                         boolean recurse,
                         Optional<Integer> workers,
                         Optional<Integer> minTokenLength,
+                        IndexType indexType,
+                        String sermonMetadataPath,
                         boolean compress,
                         boolean prettyPrint) {
         Preconditions.checkState(CollectionUtils.isNotEmpty(inputDirPaths), "Input dir paths is null/empty.");
@@ -38,39 +46,52 @@ public class IndexerArgs {
         initInputDirs(inputDirPaths);
         initOutputDir(outputdirPath);
         initStopWordsFile(stopwordsPath);
+        initSermonMetadataFile(sermonMetadataPath);
 
         this.recurse = recurse;
         this.minTokenLength = minTokenLength.orElse(DEFAULT_MIN_TOKEN_LENGTH);
         this.compress = compress;
         this.prettyPrint = prettyPrint;
         this.workers = workers.orElse(DEFAULT_WORKERS);
+        this.indexType = Preconditions.checkNotNull(indexType, "Index type cannot be null.");
         Preconditions.checkState(this.workers >= 1, "Workers must be >= 1.");
     }
 
     private void initInputDirs(Set<String> inputDirPaths) {
         this.inputdirs = inputDirPaths.stream().map(
-            s -> new File(s)).collect(Collectors.toCollection(LinkedHashSet::new));
+                s -> new File(s)).collect(Collectors.toCollection(LinkedHashSet::new));
 
         this.inputdirs.stream().forEach(d ->
-            Preconditions.checkState(d.isDirectory(),
-                "Input directory does not exist or isn't a directory: " + d.getAbsolutePath()));
+                Preconditions.checkState(d.isDirectory(),
+                        "Input directory does not exist or isn't a directory: " + d.getAbsolutePath()));
     }
 
     private void initOutputDir(String outputdirPath) {
         this.outputdir = new File(outputdirPath);
         Preconditions.checkState(outputdir.isDirectory(),
-            "Output directory does not exist or isn't a directory: " + outputdir.getAbsolutePath());
+                "Output directory does not exist or isn't a directory: " + outputdir.getAbsolutePath());
     }
 
     private void initStopWordsFile(Optional<String> stopwordsPath) {
         if (stopwordsPath.isPresent()) {
             this.stopwordsFile = new File(stopwordsPath.get());
-            Preconditions.checkState(stopwordsFile.isFile(), "Stopwords path doesn't exist or isn't a file.;");
+            Preconditions.checkState(stopwordsFile.isFile(),
+                    "Stopwords path doesn't exist or isn't a file: " + stopwordsPath);
         }
+    }
+
+    private void initSermonMetadataFile(String metadataPath) {
+        this.sermonMetadataFile = new File(metadataPath);
+        Preconditions.checkState(sermonMetadataFile.isFile(),
+                "Sermon metadata path doesn't exist or isn't a file: " + sermonMetadataFile);
     }
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public IndexType getIndexType() {
+        return indexType;
     }
 
     public Set<File> getInputdirs() {
@@ -83,6 +104,10 @@ public class IndexerArgs {
 
     public File getStopwordsFile() {
         return stopwordsFile;
+    }
+
+    public File getSermonMetadataFile() {
+        return sermonMetadataFile;
     }
 
     public boolean isRecurse() {
@@ -109,16 +134,26 @@ public class IndexerArgs {
         private Set<String> inputdirPaths;
         private String outputdirPath;
         private Optional<String> stopwordsPath = Optional.empty();
+        private String sermonMetadataPath;
         private boolean recurse = true;
         private Optional<Integer> workers = Optional.empty();
         private Optional<Integer> minTokenLength = Optional.empty();
         private boolean compress = true;
         private boolean prettyPrint = false;
+        private IndexType indexType;
 
         public Builder inputdirPaths(String[] inputdirPaths) {
             if (ArrayUtils.isNotEmpty(inputdirPaths)) {
                 this.inputdirPaths = new LinkedHashSet<>(Arrays.asList(inputdirPaths));
             }
+            return this;
+        }
+
+        public Builder indexType(String indexType) {
+            Preconditions.checkState(StringUtils.isNotBlank(indexType),
+                    "Index type cannot be blank. Must be one of %s.",
+                    Arrays.stream(IndexType.values()).collect(Collectors.toSet()));
+            this.indexType = IndexType.valueOf(indexType.toUpperCase());
             return this;
         }
 
@@ -129,6 +164,11 @@ public class IndexerArgs {
 
         public Builder stopwordsPath(Optional<String> stopwordsPath) {
             this.stopwordsPath = stopwordsPath;
+            return this;
+        }
+
+        public Builder sermonMetadataPath(String sermonMetadataPath) {
+            this.sermonMetadataPath = sermonMetadataPath;
             return this;
         }
 
@@ -159,8 +199,9 @@ public class IndexerArgs {
 
         public IndexerArgs build() {
             return new IndexerArgs(
-                inputdirPaths, outputdirPath, stopwordsPath,
-                recurse, workers, minTokenLength, compress, prettyPrint);
+                    inputdirPaths, outputdirPath, stopwordsPath,
+                    recurse, workers, minTokenLength, indexType,
+                    sermonMetadataPath, compress, prettyPrint);
         }
     }
 }

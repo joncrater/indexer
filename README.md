@@ -1,8 +1,8 @@
 ## Intro
 
-This cli crawls a given set of input directories (recursively if `-r|--recurse` is provided), extracts the text from any PDF files found and generates a lunrjs (https://lunrjs.com/) compatible index containing an entry for each PDF file encountered. The index entry will contain any keywords not found in the optional stopwords file provided by the `-s|--stopwords` option. If no stopwords file is provided, the default Lucene stopwords will be used. See full list of options below.
+This cli crawls a given set of input directories (recursively if `-r|--recurse` is provided), extracts the text from any PDF files found and, depending upon the value of the `-x|--indextype` flag, generates either a lunrjs (https://lunrjs.com/) or Apache Lucene (https://lucene.apache.org/) index containing an entry for each PDF file encountered. The index entry will contain any keywords not found in the optional stopwords file provided by the `-s|--stopwords` option. If no stopwords file is provided, the default Lucene stopwords will be used. See full list of options below.
 
-The generated index is of this form:
+Both supported index types are written to the directory provided by the `-o|--outputdir` flag. The Lucene index is written in the standard binary form. The lunrjs index is JSON and takes this form:
 
 ```
 [
@@ -29,9 +29,10 @@ The generated index is of this form:
 ]
 ```
 
-## Options
+## Usage
 
 ```
+usage: java -cp <classpath> org.dougmcintosh.index.IndexerCli <options>
  -c,--compress               gzip compress generated index.
  -h,--help                   Print usage help.
  -i,--inputdir <arg>         One or more input directories to scan for pdf files.
@@ -39,8 +40,11 @@ The generated index is of this form:
  -o,--outputdir <arg>        Output directory (must exist) where index will be written.
  -p,--pretty                 Pretty print generated json index.
  -r,--recurse                Recursively process provided directory.
- -s,--stopwordsfile <arg>    Path to file containing stop words, one per line. Any word in this file will be ignored for indexing.
+ -s,--stopwordsfile <arg>    Path to file containing stop words, one per line. Any word in this file
+                             will be ignored for indexing.
  -w,--workers <arg>          Number of worker threads that will consume files from the work queue.
+ -x,--indextype <arg>        Index type. Either lucene or lunr.
+ -m,--metadata <arg>         Path to a sermon metadata file that will be indexed with the manuscripts.
  ```
  
 ## Logging
@@ -60,7 +64,7 @@ Java 16 is required to build and run this project. https://openjdk.java.net/proj
 Run in place without building a tarball by executing `./gradlew run --args='[args]'` from the project root. For example:
 
 ```
-./gradlew run --args='--pretty --recurse --compress --workers 4 --inputdir /Users/jon/dev/projects/mcintosh/www/pdf --outputdir /Users/jon/dev/projects/mcintosh/indexer/build --stopwordsfile /Users/jon/dev/projects/mcintosh/indexer/var/conf/stopwords.txt'
+./gradlew run --args='--pretty --recurse --compress --workers 4 --inputdir /Users/jon/dev/projects/mcintosh/www/pdf --outputdir /Users/jon/dev/projects/mcintosh/indexer/build --stopwordsfile /Users/jon/dev/projects/mcintosh/indexer/var/conf/stopwords.txt -x lucene -m /Users/jon/dev/projects/mcintosh/site-v1/src/data/allSermonData.json'
 ```
 
 ### From Extracted Distribution
