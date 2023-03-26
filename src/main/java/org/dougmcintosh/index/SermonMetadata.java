@@ -50,9 +50,11 @@ public class SermonMetadata {
         Preconditions.checkState(pdf.isFile(), "Provided manuscript file does not exist: " + pdf.getAbsolutePath());
         final String path = relativePathFromManuscriptFile(pdf);
         final IndexEntry.Builder bldr = indexEntries.get(path);
+
         if (bldr == null) {
             logger.warn("No entry builder exists for path: {}", path);
         }
+
         return bldr;
     }
 
